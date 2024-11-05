@@ -196,11 +196,11 @@ class CubicalComplex(nn.Module):
         return persistence_information
 
     def _extract_generators_and_diagrams(self, x, cofaces, dim):
-        pairs = torch.empty((0, 2), dtype=torch.long)
+        pairs = torch.empty((0, 2), dtype=torch.long, device=x.device)
 
         try:
             regular_pairs = torch.as_tensor(
-                cofaces[0][dim], dtype=torch.long
+                cofaces[0][dim], dtype=torch.long, device=x.device
             )
             pairs = torch.cat(
                 (pairs, regular_pairs)
@@ -210,7 +210,7 @@ class CubicalComplex(nn.Module):
 
         try:
             infinite_pairs = torch.as_tensor(
-                cofaces[1][dim], dtype=torch.long
+                cofaces[1][dim], dtype=torch.long, device=x.device
             )
             infinite_pairs.to(x)
         except IndexError:
@@ -239,19 +239,9 @@ class CubicalComplex(nn.Module):
 
         # Notice that `creators` and `destroyers` refer to pixel
         # coordinates in the image.
-        creators = torch.as_tensor(
-                np.column_stack(
-                    np.unravel_index(pairs[:, 0], xs)
-                ),
-                dtype=torch.long
-        )
-        destroyers = torch.as_tensor(
-                np.column_stack(
-                    np.unravel_index(pairs[:, 1], xs)
-                ),
-                dtype=torch.long
-        )
-        gens = torch.as_tensor(torch.hstack((creators, destroyers)))
+        creators = torch.column_stack(torch.unravel_index(pairs[:, 0], xs))
+        destroyers = torch.column_stack(torch.unravel_index(pairs[:, 1], xs))
+        gens = torch.hstack((creators, destroyers))
 
         # TODO: Most efficient way to generate diagram again?
         persistence_diagram = torch.stack((
