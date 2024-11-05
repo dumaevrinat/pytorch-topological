@@ -212,6 +212,7 @@ class CubicalComplex(nn.Module):
             infinite_pairs = torch.as_tensor(
                 cofaces[1][dim], dtype=torch.long
             )
+            infinite_pairs.to(x)
         except IndexError:
             infinite_pairs = None
 
