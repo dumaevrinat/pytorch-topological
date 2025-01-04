@@ -1,3 +1,7 @@
+[project]
+name = "torch_topological"
+version = "0.1.7"
+
 [tool.poetry]
 name = "torch_topological"
 version = "0.1.7"
