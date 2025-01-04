@@ -22,7 +22,7 @@ class SlicedWassersteinDistance(torch.nn.Module):
     the origin.
     """
 
-    def __init__(self, num_directions=10):
+    def __init__(self, device: torch.device, num_directions=10):
         """Create new sliced Wasserstein distance calculation module.
 
         Parameters
@@ -33,13 +33,14 @@ class SlicedWassersteinDistance(torch.nn.Module):
         """
         super().__init__()
 
+        self._device = device
         # Generates num_directions number of lines with slopes randomly sampled
         # between -pi/2 and pi/2.
         self.num_directions = num_directions
-        thetas = torch.linspace(-np.pi/2, np.pi/2, steps=self.num_directions+1)
+        thetas = torch.linspace(-np.pi/2, np.pi/2, steps=self.num_directions+1, device=self._device)
         thetas = thetas[:-1]
         self.lines = torch.vstack([torch.tensor([torch.cos(i), torch.sin(i)],
-                                  dtype=torch.float32) for i in thetas])
+                                  dtype=torch.float32, device=self._device) for i in thetas])
 
     def _emd1d(self, X, Y):
         # Compute Wasserstein Distance between two 1d-distributions.
@@ -80,7 +81,7 @@ class SlicedWassersteinDistance(torch.nn.Module):
             D2 = pers_info[1].diagram.float()
 
             # Auxiliary array to project onto diagonal.
-            diag = torch.tensor([0.5, 0.5], dtype=torch.float32)
+            diag = torch.tensor([0.5, 0.5], dtype=torch.float32, device=self._device)
 
             # Project both the diagrams onto the diagonals.
             D1_diag = torch.sum(D1, dim=1, keepdim=True) * diag
